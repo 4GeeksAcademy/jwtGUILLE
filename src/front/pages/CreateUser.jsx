@@ -22,11 +22,17 @@ const CreateUser = () => {
         setLoading(true);
 
         try {
-            await newUser(formData);
-            alert("Usuario registrado exitosamente. Por favor inicia sesión.");
-            navigate('/login');
+            const result = await newUser(formData);
+            
+            if (result && result.msg === "Usuario creado exitosamente") {
+                alert("Usuario registrado exitosamente. Por favor inicia sesión.");
+                navigate('/login');
+            } else {
+                alert(result?.msg || "Error en el registro");
+            }
         } catch (error) {
-            alert(error.message || "Error en el registro");
+            console.error("Error en registro:", error);
+            alert("Error en el registro");
         } finally {
             setLoading(false);
         }
@@ -38,7 +44,7 @@ const CreateUser = () => {
                 <div className="col-md-6">
                     <div className="card">
                         <div className="card-body">
-                            <h2 className="card-title text-center mb-4">Registro</h2>
+                            <h2 className="card-title text-center mb-4">Registro de Usuario</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
                                     <label htmlFor="email" className="form-label">Email</label>
@@ -50,7 +56,7 @@ const CreateUser = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
-                                        placeholder="ejemplo@correo.com"
+                                        placeholder="tu@email.com"
                                     />
                                 </div>
                                 <div className="mb-3">
@@ -64,7 +70,6 @@ const CreateUser = () => {
                                         onChange={handleChange}
                                         required
                                         placeholder="Mínimo 6 caracteres"
-                                        minLength="6"
                                     />
                                 </div>
                                 <button 
@@ -76,7 +81,7 @@ const CreateUser = () => {
                                 </button>
                             </form>
                             <div className="text-center mt-3">
-                                <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link></p>
+                                <p>¿Ya tienes cuenta? <Link to="/login">Inicia sesión aquí</Link></p>
                             </div>
                         </div>
                     </div>

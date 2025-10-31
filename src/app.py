@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from api.models import db
 from api.routes import setup_routes
-import os
 
 def create_app():
     app = Flask(__name__)
@@ -11,9 +10,6 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///project.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = 'tu-clave-secreta-aqui'
-    
-    # Configuración JWT
-    app.config["JWT_SECRET_KEY"] = "super-secret-key-change-in-production"
     
     # Inicializar extensiones
     db.init_app(app)
@@ -26,14 +22,14 @@ def create_app():
     with app.app_context():
         db.create_all()
     
-    # Ruta de prueba
-    @app.route('/')
-    def hello():
-        return jsonify({"message": "Backend funcionando correctamente"})
+    # Ruta de health check
+    @app.route('/health')
+    def health():
+        return jsonify({"status": "healthy", "service": "backend"})
     
     return app
 
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=3001, debug=True)

@@ -25,7 +25,6 @@ const Login = () => {
             await loginUser(formData, navigate);
         } catch (error) {
             console.error("Error en login:", error);
-            alert("Error en el inicio de sesión");
         } finally {
             setLoading(false);
         }
@@ -49,6 +48,7 @@ const Login = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
+                                        placeholder="tu@email.com"
                                     />
                                 </div>
                                 <div className="mb-3">
@@ -61,6 +61,7 @@ const Login = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         required
+                                        placeholder="Tu contraseña"
                                     />
                                 </div>
                                 <button 
@@ -72,7 +73,7 @@ const Login = () => {
                                 </button>
                             </form>
                             <div className="text-center mt-3">
-                                <p>¿No tienes cuenta? <Link to="/signup">Regístrate</Link></p>
+                                <p>¿No tienes cuenta? <Link to="/signup">Regístrate aquí</Link></p>
                             </div>
                         </div>
                     </div>

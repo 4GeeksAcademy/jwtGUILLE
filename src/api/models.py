@@ -1,6 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-import datetime
 
 db = SQLAlchemy()
 
@@ -9,7 +8,6 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     is_active = db.Column(db.Boolean(), nullable=False, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -24,6 +22,5 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            "is_active": self.is_active,
-            "created_at": self.created_at.isoformat()
+            "is_active": self.is_active
         }

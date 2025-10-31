@@ -6,18 +6,38 @@ from .models import db, User
 def setup_routes(app):
     jwt = JWTManager(app)
     
-    @app.route('/register', methods=['POST'])
+    # Configuración del JWT
+    app.config["JWT_SECRET_KEY"] = "super-secret-key-change-in-production"
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
+    
+    # RUTA RAIZ PARA VERIFICAR QUE EL BACKEND FUNCIONA
+    @app.route('/')
+    def home():
+        return jsonify({
+            "message": "✅ Backend funcionando correctamente", 
+            "status": "active",
+            "endpoints": {
+                "register": "/api/register (POST)",
+                "login": "/api/login (POST)", 
+                "protected": "/api/protected (GET)"
+            }
+        })
+    
+    # RUTA DE PRUEBA PARA LA API
+    @app.route('/api/test')
+    def test():
+        return jsonify({"message": "✅ API funcionando correctamente"})
+    
+    @app.route('/api/register', methods=['POST'])
     def register():
         try:
             data = request.get_json()
-            print("Datos recibidos:", data)  # Debug
             
             if not data or not data.get('email') or not data.get('password'):
                 return jsonify({"msg": "Email y contraseña son requeridos"}), 400
             
             # Verificar si el usuario ya existe
-            existing_user = User.query.filter_by(email=data['email']).first()
-            if existing_user:
+            if User.query.filter_by(email=data['email']).first():
                 return jsonify({"msg": "El usuario ya existe"}), 400
             
             # Crear nuevo usuario
@@ -32,25 +52,20 @@ def setup_routes(app):
             
         except Exception as e:
             db.session.rollback()
-            print("Error:", str(e))  # Debug
             return jsonify({"msg": "Error creando usuario", "error": str(e)}), 500
 
-    @app.route('/login', methods=['POST'])
+    @app.route('/api/login', methods=['POST'])
     def login():
         try:
             data = request.get_json()
-            print("Login data:", data)  # Debug
             
             if not data or not data.get('email') or not data.get('password'):
                 return jsonify({"msg": "Email y contraseña son requeridos"}), 400
             
             user = User.query.filter_by(email=data['email']).first()
             
-            if not user:
-                return jsonify({"msg": "Usuario no encontrado"}), 401
-            
-            if not user.check_password(data['password']):
-                return jsonify({"msg": "Contraseña incorrecta"}), 401
+            if not user or not user.check_password(data['password']):
+                return jsonify({"msg": "Credenciales inválidas"}), 401
             
             # Crear token de acceso
             access_token = create_access_token(identity=user.id)
@@ -58,17 +73,13 @@ def setup_routes(app):
             return jsonify({
                 "msg": "Login exitoso",
                 "token": access_token,
-                "user": {
-                    "id": user.id,
-                    "email": user.email
-                }
+                "user": user.serialize()
             }), 200
             
         except Exception as e:
-            print("Login error:", str(e))  # Debug
             return jsonify({"msg": "Error en el login", "error": str(e)}), 500
 
-    @app.route('/protected', methods=['GET'])
+    @app.route('/api/protected', methods=['GET'])
     @jwt_required()
     def protected():
         try:
@@ -80,15 +91,8 @@ def setup_routes(app):
             
             return jsonify({
                 "msg": "Acceso permitido",
-                "user": {
-                    "id": user.id,
-                    "email": user.email
-                }
+                "user": user.serialize()
             }), 200
             
         except Exception as e:
             return jsonify({"msg": "Error accediendo a ruta protegida", "error": str(e)}), 500
-
-    @app.route('/test', methods=['GET'])
-    def test():
-        return jsonify({"message": "Test route working"})
